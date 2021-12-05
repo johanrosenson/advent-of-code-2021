@@ -2,6 +2,18 @@ String.prototype.rows = function (delimiter = '\n') {
     return this.split(delimiter);
 };
 
+range = function (start, stop, step = 1) {
+    const arrayLike = {
+        length: (Math.max(start, stop) - Math.min(start, stop)) / step + 1
+    };
+
+    return Array.from(arrayLike, function (element, index) {
+        return start < stop
+            ? start + (index * step)
+            : start - (index * step);
+    });
+};
+
 Array.prototype.sum = function () {
     // the sum of the array
     return [...this].reduce((n, carry) => n + carry, 0);

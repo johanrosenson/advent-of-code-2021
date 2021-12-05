@@ -12,62 +12,44 @@ input.forEach(function (line) {
     const [x1, y1] = start.split(',').map(n=>parseInt(n));
     const [x2, y2] = end.split(',').map(n=>parseInt(n));
 
-    if (x1 === x2) {
-        let x = x1;
+    const [yrange, xrange] = ((x1, y1, x2, y2) => {
+        if (x1 === x2) {
+            const yrange = range(y1, y2);
+            const xrange = Array(yrange.length).fill(x1);
 
-        for (let y = Math.min(y1, y2); y <= Math.max(y1, y2); y++) {
-            if (typeof grid[y] === 'undefined') {
-                grid[y] = [];
-            }
+            return [
+                yrange,
+                xrange,
+            ];
+        } else if (y1 === y2) {
+            const xrange = range(x1, x2);
+            const yrange = Array(xrange.length).fill(y1);
 
-            grid[y][x] = typeof grid[y][x] !== 'undefined'
-                ? grid[y][x] + 1
-                : 1;
+            return [
+                yrange,
+                xrange,
+            ];
+        } else {
+            const yrange = range(y1, y2);
+            const xrange = range(x1, x2);
+
+            return [
+                yrange,
+                xrange,
+            ];
         }
-    } else if (y1 === y2) {
-        let y = y1;
+    })(x1, y1, x2, y2);
 
-        for (let x = Math.min(x1, x2); x <= Math.max(x1, x2); x++) {
-            if (typeof grid[y] === 'undefined') {
-                grid[y] = [];
-            }
+    while ((y = yrange.shift()) !== undefined) {
+        let x = xrange.shift();
 
-            grid[y][x] = typeof grid[y][x] !== 'undefined'
-                ? grid[y][x] + 1
-                : 1;
+        if (typeof grid[y] === 'undefined') {
+            grid[y] = [];
         }
-    } else if (x1 < x2) {
-        let y = y1;
 
-        for (let x = x1; x <= x2; x++) {
-            if (typeof grid[y] === 'undefined') {
-                grid[y] = [];
-            }
-
-            grid[y][x] = typeof grid[y][x] !== 'undefined'
-                ? grid[y][x] + 1
-                : 1;
-
-            y = y1 < y2
-                ? y + 1
-                : y - 1;
-        }
-    } else {
-        let y = y1;
-
-        for (let x = x1; x >= x2; x--) {
-            if (typeof grid[y] === 'undefined') {
-                grid[y] = [];
-            }
-
-            grid[y][x] = typeof grid[y][x] !== 'undefined'
-                ? grid[y][x] + 1
-                : 1;
-
-            y = y1 < y2
-                ? y + 1
-                : y - 1;
-        }
+        grid[y][x] = typeof grid[y][x] !== 'undefined'
+            ? grid[y][x] + 1
+            : 1;
     }
 });
 
