@@ -3,3 +3,4 @@ example*.txt
 .DS_Store
 session.cookie
 /node_modules
+curl.txt
