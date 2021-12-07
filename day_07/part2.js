@@ -20,7 +20,4 @@ const fuel = range(Math.min(...crabs), Math.max(...crabs))
     // get the least fuel consumption
     .min();
 
-console.log([
-    fuel,
-    fuel === 92676646
-]);
+console.log(fuel);
