@@ -6,43 +6,21 @@ const crabs = fs.readFileSync('input.txt', 'utf8')
     // .split('\n')
     .split(',').map(v=>parseInt(v))
 
-let answer = 0;
+// get the range of positions
+const fuel = range(Math.min(...crabs), Math.max(...crabs))
+    // get total fuel consumption for each position
+    .map(function (position) {
+        // map each grab to fuel consumtion to move into position and sum all fuel consumptions
+        return crabs.map(crab => {
+            let distance = Math.abs(crab - position);
 
-let bestPosition = null;
-let leastFuel = null;
+            return (distance * (distance + 1)) / 2;
+        }).sum();
+    })
+    // get the least fuel consumption
+    .min();
 
-const calculateFuel = function (position, crab) {
-    let fuel = 0;
-    let currentFuel = 1;
-
-    let currentPosition = Math.min(position, crab);
-    const end = Math.max(position, crab);
-
-    while (currentPosition < end) {
-        fuel += currentFuel++;
-
-        currentPosition++;
-    }
-
-    return fuel;
-};
-
-for (let position = Math.min(...crabs), position_max = Math.max(...crabs); position <= position_max; position++) {
-    let fuelSum = 0;
-
-    for (let j = 0; j < crabs.length; j++) {
-        const crab = crabs[j];
-        const fuel = calculateFuel(position, crab);
-
-        fuelSum += fuel;
-    }
-
-    if (leastFuel === null || fuelSum < leastFuel) {
-        leastFuel = fuelSum;
-        bestPosition = position;
-    }
-}
-
-console.log(
-    leastFuel,
-);
+console.log([
+    fuel,
+    fuel === 92676646
+]);
