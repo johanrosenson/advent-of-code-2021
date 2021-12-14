@@ -52,10 +52,9 @@ for (let i = 0; i < template.length - 1; i++) {
 // initial element counts
 template.split('').forEach(element => incrementElementCount(elements, element, 1));
 
-let step = 0;
-const maxSteps = 40;
+let steps = 40;
 
-while (step++ < maxSteps) {
+while (steps-- > 0) {
     for (const [pair, count] of new Map(pairs)) {
         if (count === 0) {
             continue;
