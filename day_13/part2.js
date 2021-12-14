@@ -6,6 +6,10 @@ const input = fs.readFileSync('input.txt', 'utf8').trim()
     .split('\n')
     // .map(n=>parseInt(n))
 
+// refactor to work with:
+// https://gist.github.com/skius/d4c3cc4fcd8b199f1603c411714f220f
+// https://davidyue.live/aoc/app/foldcode.html
+
 let grid = [];
 
 const dots = input
@@ -68,10 +72,10 @@ for (fold of folds) {
     const newGrid = [];
 
     if (axis === 'y') {
-        console.log(grid.length);
+        // console.log(grid.length);
         // loop up until Y value and just add as normal
         for (let y = 0; y < value; y++) {
-            console.log({y});
+            // console.log({y});
 
             const newRow = [];
 
@@ -92,7 +96,7 @@ for (fold of folds) {
         for (let y = value + 1; y < grid.length; y++) {
             const newY = value - (y - value);
 
-            console.log({y, newY});
+            // console.log({y, newY});
 
             const newRow = newGrid[newY];
 
@@ -152,20 +156,20 @@ for (fold of folds) {
 
 displayGrid(grid);
 
-const countDots = function (grid) {
-    let dots = 0;
+// const countDots = function (grid) {
+//     let dots = 0;
 
-    for (let y = 0; y < grid.length; y++) {
-        for (let x = 0; x < grid[y].length; x++) {
-            if (grid[y][x] === '#') {
-                dots++;
-            }
-        }
-    }
+//     for (let y = 0; y < grid.length; y++) {
+//         for (let x = 0; x < grid[y].length; x++) {
+//             if (grid[y][x] === '#') {
+//                 dots++;
+//             }
+//         }
+//     }
 
-    return dots;
-};
+//     return dots;
+// };
 
-const answer = countDots(grid);
+// const answer = countDots(grid);
 
-console.log(answer);
+// console.log(answer);
