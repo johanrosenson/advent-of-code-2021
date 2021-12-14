@@ -1,5 +1,7 @@
 require('../array');
 
+console.time('part2');
+
 const fs = require('fs');
 
 const input = fs.readFileSync('input.txt', 'utf8').trim()
@@ -82,3 +84,5 @@ const least = elementCounts.shift();
 const most = elementCounts.pop();
 
 console.log(most - least);
+
+console.timeEnd('part2');

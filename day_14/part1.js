@@ -1,10 +1,11 @@
 require('../array');
 
+console.time('part1');
+
 const fs = require('fs');
 
 const input = fs.readFileSync('input.txt', 'utf8').trim()
     .split('\n')
-    // .map(n=>parseInt(n))
 
 const template = input.shift();
 
@@ -15,8 +16,6 @@ input.slice(1).forEach(function (rule) {
 
     rules.set(pair, insertion);
 });
-
-console.log({rules});
 
 let output = template;
 
@@ -58,3 +57,5 @@ const least = counts.shift();
 const most = counts.pop();
 
 console.log(most - least);
+
+console.timeEnd('part1');
