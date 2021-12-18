@@ -17,179 +17,117 @@ const parseInput = function (input) {
 
 const target = parseInput(input);
 
-const sleep = function (ms) {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    });
-}
-
-const isInsideTarget = function (x, y) {
-    if (x < target.x1) {
-        return false;
-    }
-
-    if (x > target.x2) {
-        return false;
-    }
-
-    if (y < target.y1) {
-        return false;
-    }
-
-    if (y > target.y2) {
-        return false;
-    }
-
-    return true;
+const getMaxX = function (xv) {
+    return (xv * (xv + 1)) / 2;
 };
 
-const hitTarget = function (trace) {
-    const points = Array.from(trace.values());
+const calculateMinXV = function () {
+    const horizontalDistanceToTarget = target.x1;
 
-    for (point of points) {
-        if (isInsideTarget(point[0], point[1])) {
-            return true;
-        }
-    }
+    let minXV = 1;
 
-    return false;
-};
+    while (true) {
+        let maxX = getMaxX(minXV);
 
-const getPeakY = function (trace) {
-    return Array.from(trace.values())
-        .map(point => point[1])
-        .max();
-};
-
-const drawMap = async function (trace, maxY, trajectories, initialXV, initialYV) {
-    // console.log({trace});
-
-    const xstart = 0;
-    const xend = target.x2 + 2; // stop drawing 2 beyond the target
-
-    const ystart = maxY; // max possible Y
-    const yend = target.y1 - 2; // stop drawing 2 below the target
-
-    // console.log({ystart, yend});
-
-    // return;
-
-    console.clear();
-
-    for (let y = ystart; y >= yend; y--) {
-        let row = '';
-
-        for (let x = xstart; x <= xend; x++) {
-            const key = x + ',' + y;
-
-            if (trace.has(key)) {
-                if (x === 0 && y === 0) {
-                    row += 'S';
-                } else {
-                    row += '#';
-                }
-            } else if (isInsideTarget(x, y)) {
-                row += 'T';
-            } else {
-                row += '.';
-            }
+        if (maxX >= horizontalDistanceToTarget) {
+            break;
         }
 
-        console.log(row);
+        minXV++;
     }
 
-    console.log('Trajectories found: ' + String(trajectories.length) + ' (' + String(initialXV) + '/' + String(initialYV) + ')');
-
-    if (trace.size === 1) {
-        await sleep(100);
-    } else {
-        await sleep(15);
-    }
-}
-
-const calculateVelocity = function (x, y) {
-    return [
-        // Due to drag, the probe's x velocity changes by 1 toward the value 0;
-        // that is, it decreases by 1 if it is greater than 0,
-        // increases by 1 if it is less than 0, or does not change if it is already 0.
-        Math.max(0, x - 1),
-        // Due to gravity, the probe's y velocity decreases by 1.
-        y - 1,
-    ];
+    return minXV;
 };
 
-const missedTarget = function (xp, yp, xv) {
-    if (xv === 0 && xp < target.x1) {
-        return true; // will always be to the left of the target
+const calculateXPosition = function (xv, steps) {
+    if (steps > xv) {
+        return getMaxX(xv);
     }
 
-    if (xp > target.x1 + target.x2) {
-        return true; // will always be to the right of the target
+    let xPosition = 0;
+    let xvCurrent = xv;
+
+    while (steps-- > 0) {
+        xPosition += xvCurrent;
+
+        xvCurrent--;
     }
 
-    if (yp < target.y1 + target.y2) {
-        return true; // is already below the target
-    }
-
-    return false;
-}
-
-
+    return xPosition;
+};
 
 const run = async function () {
-    const targetWidthOffset = target.x2;
-    const targetHeightOffset = Math.abs(target.y1);
+    const verticalHitThreshold = target.y2;
+    const verticalMissThreshold = target.y1 - 1;
 
-    // needs proper calculations
-    const minXV = 1;
-    const maxXV = target.x2 + 1;
+    const xvMin = calculateMinXV();
+    const xvMax = target.x2;
 
-    // needs proper calculations
-    const minYV = targetHeightOffset * -1;
-    const maxYV = targetHeightOffset;
+    const yvMin = Math.abs(target.y1) * -1;
+    const yvMax = Math.abs(target.y1) - 1;
 
     const trajectories = [];
     let iterations = 0;
 
-    for (let initialYV = minYV; initialYV <= maxYV; initialYV++) {
-        // calculate the max Y this trajectory can reach
-        const maxY = (initialYV * (initialYV + 1)) / 2;
+    for (let yv = yvMin; yv <= yvMax; yv++) {
+        const roundtripSteps = yv > 0
+            ? (yv * 2) + 1
+            : 0;
+        const velocityAfterRoundtrip = yv > 0
+            ? (yv * -1) - 1
+            : yv;
 
-        for (let initialXV = minXV; initialXV <= maxXV; initialXV++) {
-            let [xv, yv] = [initialXV, initialYV];
+        let yMinSteps = null;
+        let yMaxSteps = null;
+        let ySteps = 0;
 
-            // starting position
-            let [xp, yp] = [0, 0];
+        let yPosition = 0;
+        let yvCurrent = velocityAfterRoundtrip;
 
-            const trace = new Map;
+        while (yPosition > verticalMissThreshold) {
+            yPosition += yvCurrent;
+            yvCurrent--;
+            ySteps++;
 
-            trace.set(xp + ',' + yp, [xp, yp]);
+            iterations++;
 
-            while (! missedTarget(xp, yp, xv)) {
-                xp += xv;
-                yp += yv;
+            if (yPosition <= verticalHitThreshold && yPosition > verticalMissThreshold) {
+                yMinSteps = yMinSteps === null
+                    ? ySteps
+                    : yMinSteps;
+                yMaxSteps = ySteps;
+            }
+        }
 
-                trace.set(xp + ',' + yp, [xp, yp, xv, yv]);
+        if (yMinSteps === null) {
+            break;
+        }
 
+        yMinSteps += roundtripSteps;
+        yMaxSteps += roundtripSteps;
+
+        for (let xv = xvMin; xv <= xvMax; xv++) {
+            for (steps of range(yMinSteps, yMaxSteps)) {
                 iterations++;
 
-                // await drawMap(trace, maxY, trajectories, initialXV, initialYV);
+                const xPosition = calculateXPosition(xv, steps);
 
-                if (hitTarget(trace)) {
-                    trajectories.push([initialXV, initialYV]);
+                if (xPosition >= target.x1 && xPosition <= target.x2) {
+                    trajectories.push([
+                        xv,
+                        yv,
+                    ]);
 
                     break;
                 }
-
-                [xv, yv] = calculateVelocity(xv, yv);
             }
-
-            // console.log({trace});
         }
     }
 
-    console.log(trajectories.length);
+    const expected = 2555;
 
+    console.log({trajectories});
+    console.log([trajectories.length, expected, trajectories.length === expected]);
     console.log({iterations});
 
     console.timeEnd('part2');
