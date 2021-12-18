@@ -56,76 +56,72 @@ const calculateXPosition = function (xv, steps) {
     return xPosition;
 };
 
-const run = async function () {
-    const verticalHitThreshold = target.y2;
-    const verticalMissThreshold = target.y1 - 1;
+const verticalHitThreshold = target.y2;
+const verticalMissThreshold = target.y1 - 1;
 
-    const xvMin = calculateMinXV();
-    const xvMax = target.x2;
-    const yvMin = Math.abs(target.y1) * -1;
-    const yvMax = Math.abs(target.y1) - 1;
+const xvMin = calculateMinXV();
+const xvMax = target.x2;
+const yvMin = Math.abs(target.y1) * -1;
+const yvMax = Math.abs(target.y1) - 1;
 
-    let trajectories = 0;
-    let iterations = 0;
+let trajectories = 0;
+let iterations = 0;
 
-    for (let yv = yvMin; yv <= yvMax; yv++) {
-        const roundtripSteps = yv > 0
-            ? (yv * 2) + 1
-            : 0;
-        const velocityAfterRoundtrip = yv > 0
-            ? (yv * -1) - 1
-            : yv;
+for (let yv = yvMin; yv <= yvMax; yv++) {
+    const roundtripSteps = yv > 0
+        ? (yv * 2) + 1
+        : 0;
+    const velocityAfterRoundtrip = yv > 0
+        ? (yv * -1) - 1
+        : yv;
 
-        let yMinSteps = null;
-        let yMaxSteps = null;
-        let ySteps = 0;
+    let yMinSteps = null;
+    let yMaxSteps = null;
+    let ySteps = 0;
 
-        let yPosition = 0;
-        let yvCurrent = velocityAfterRoundtrip;
+    let yPosition = 0;
+    let yvCurrent = velocityAfterRoundtrip;
 
-        while (yPosition > verticalMissThreshold) {
-            yPosition += yvCurrent;
-            yvCurrent--;
-            ySteps++;
+    while (yPosition > verticalMissThreshold) {
+        yPosition += yvCurrent;
+        yvCurrent--;
+        ySteps++;
 
-            iterations++;
+        iterations++;
 
-            if (yPosition <= verticalHitThreshold && yPosition > verticalMissThreshold) {
-                yMinSteps = yMinSteps === null
-                    ? ySteps
-                    : yMinSteps;
-                yMaxSteps = ySteps;
-            }
-        }
-
-        if (yMinSteps === null) {
-            continue;
-        }
-
-        yMinSteps += roundtripSteps;
-        yMaxSteps += roundtripSteps;
-
-        for (let xv = xvMin; xv <= xvMax; xv++) {
-            for (steps of range(yMinSteps, yMaxSteps)) {
-                iterations++;
-
-                const xPosition = calculateXPosition(xv, steps);
-
-                if (xPosition >= target.x1 && xPosition <= target.x2) {
-                    trajectories++;
-
-                    break;
-                }
-            }
+        if (yPosition <= verticalHitThreshold && yPosition > verticalMissThreshold) {
+            yMinSteps = yMinSteps === null
+                ? ySteps
+                : yMinSteps;
+            yMaxSteps = ySteps;
         }
     }
 
-    console.log({
-        trajectories,
-        iterations,
-    });
+    if (yMinSteps === null) {
+        continue;
+    }
 
-    console.timeEnd('part2');
-};
+    yMinSteps += roundtripSteps;
+    yMaxSteps += roundtripSteps;
 
-run();
+    for (let xv = xvMin; xv <= xvMax; xv++) {
+        for (steps of range(yMinSteps, yMaxSteps)) {
+            iterations++;
+
+            const xPosition = calculateXPosition(xv, steps);
+
+            if (xPosition >= target.x1 && xPosition <= target.x2) {
+                trajectories++;
+
+                break;
+            }
+        }
+    }
+}
+
+console.log({
+    trajectories,
+    iterations,
+});
+
+console.timeEnd('part2');
