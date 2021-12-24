@@ -4,3 +4,4 @@ example*.txt
 session.cookie
 /node_modules
 curl.txt
+wip.txt
